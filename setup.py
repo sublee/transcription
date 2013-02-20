@@ -1,8 +1,11 @@
 """
-Linguist
-~~~~~~~~
+Transcription
+~~~~~~~~~~~~~
 
-A linguist.
+A transcription tool or a generalization of Hangulize_.
+
+.. _Hangulize: http://hangulize.org/
+
 """
 from __future__ import with_statement
 import re
@@ -11,7 +14,7 @@ from setuptools.command.test import test
 
 
 # detect the current version
-with open('linguist/__init__.py') as f:
+with open('transcription/__init__.py') as f:
     version = re.search(r'__version__\s*=\s*\'(.+?)\'', f.read()).group(1)
 assert version
 
@@ -23,12 +26,12 @@ test.run_tests = run_tests
 
 
 setup(
-    name='linguist',
+    name='transcription',
     version=version,
     license='BSD',
     author='Heungsub Lee',
     author_email=re.sub('((sub).)(.*)', r'\2@\1.\3', 'sublee'),
-    description='A linguist',
+    description='A transcription tool',
     long_description=__doc__,
     platforms='any',
     packages=['pronunciation'],
