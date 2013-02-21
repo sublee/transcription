@@ -57,7 +57,7 @@ setup(
         'Topic :: Software Development :: Localization',
         'Topic :: Text Processing :: Linguistic',
     ],
-    install_requires=['distribute', 'pyyaml'],
+    install_requires=['distribute', 'pyyaml', 'typequery'],
     test_suite='tests',
     tests_require=['pytest'],
 )

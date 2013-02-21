@@ -16,9 +16,12 @@ __all__ = ['Pattern']
 class Pattern(object):
 
     token_pattern = re.compile('(?:([^()]+)|\((.+?)\))')
+
+    text = None
     tokens = None
 
     def __init__(self, text):
+        self.text = text
         self.tokens = self.tokenize(text)
 
     def tokenize(self, text):
@@ -54,3 +57,6 @@ class Pattern(object):
                         new_possibles.append((new_priority, buf + [candidate]))
             possibles = new_possibles
         return [(priority, ''.join(buf)) for priority, buf in possibles]
+
+    def __repr__(self):
+        return '{name}({text!r})'.format(type(self).__name__, self.text)
