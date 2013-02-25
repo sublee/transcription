@@ -14,6 +14,8 @@ import re
 from typequery import GenericMethod
 import yaml
 
+from .respell import Respell
+
 
 __all__ = ['Representation', 'generate_from_yaml']
 
@@ -34,20 +36,29 @@ class Representation(object):
 
     name = None
     locale = None
-    variables = None
-    respelling_pipelines = None
+    vars = None
+    respellings = None
 
-    def __init__(self, name, locale=None,
-                 variables=None, respelling_pipelines=None):
+    def __init__(self, name, locale=None, vars=None, respellings=None):
         self.name = name
         self.locale = locale
-        self.variables = variables or {}
-        self.respelling_pipelines = respelling_pipelines or {}
+        self.vars = vars or {}
+        self.respellings = respellings or {}
+
+    def respell(self, dest, text):
+        for respell in self.respellings[dest]:
+            text = respell(text)
+        return text
+
+    def respellables(self):
+        return self.respellings.keys()
 
 
 class RepresentationGenerator(object):
 
-    ref_pattern = re.compile(r'^<(.+)>$')
+    _ref_pattern = re.compile(r'^<(.+)>$')
+    _respell_pattern = re.compile(r'^respell->(.+)$')
+
     normalize_glyphs = GenericMethod('normalize_glyphs')
 
     @normalize_glyphs.of(basestring)
@@ -71,11 +82,11 @@ class RepresentationGenerator(object):
                 flatten.extend(normalize_glyphs(val))
         return flatten
 
-    def resolve_refs(self, glyphs, variables, var=None):
+    def resolve_refs(self, glyphs, vars, var=None):
         has_ref = False
         resolved  = []
         for glyph in glyphs:
-            ref_match = self.ref_pattern.match(glyph)
+            ref_match = self._ref_pattern.match(glyph)
             if ref_match is None:
                 resolved.append(glyph)
                 continue
@@ -84,10 +95,10 @@ class RepresentationGenerator(object):
             if var == ref:
                 continue
             try:
-                resolved.extend(self.resolve_refs(variables[ref],
-                                                  variables, var))
+                resolved.extend(self.resolve_refs(vars[ref],
+                                                  vars, var))
             except ValueError:
-                resolved.extend(variables[ref])
+                resolved.extend(vars[ref])
         if not has_ref:
             raise ValueError('The glyphs doesn\'t have references')
         return resolved
@@ -99,18 +110,28 @@ class RepresentationGenerator(object):
         except KeyError:
             raise ValueError('Representation needs a name')
         locale = data.get('locale')
-        variables = {}
+        # vars
+        vars = {}
         for var, definition in data.get('define', {}).iteritems():
             glyphs = self.normalize_glyphs(definition)
             assert isinstance(glyphs, list)
-            variables[var] = glyphs
-        # resolve variable references
-        for var, glyphs in variables.iteritems():
+            vars[var] = glyphs
+        for var, glyphs in vars.iteritems():
             try:
-                variables[var] = self.resolve_refs(glyphs, variables, var)
+                vars[var] = self.resolve_refs(glyphs, vars, var)
             except ValueError:
                 continue
-        return Representation(name, locale, variables)
+        # respelling pipelines
+        respellings = {}
+        for key, val in data.iteritems():
+            respell_match = self._respell_pattern.match(key)
+            if respell_match is None:
+                continue
+            dest = respell_match.group(1)
+            raw_pipeline = (item.items()[0] for item in val)
+            respellings[dest] = [Respell(pattern, replacement, vars)
+                                 for pattern, replacement in raw_pipeline]
+        return Representation(name, locale, vars, respellings)
 
 
 generate_from_yaml = RepresentationGenerator().generate_from_yaml

@@ -4,26 +4,12 @@ from __future__ import unicode_literals
 from transcription import Representation, representation
 
 
-def test_parse_yaml():
-    yaml = '''
-    name: 'test'
-    normalize:
-      use: ['roman_to_lower']
-    define:
-      vowels: {'aeiou'}
-      consonants: {'qwrtypsdfghjklzxcvbnm'}
-      all: [<vowels>, <consonants>]
-      self_ref: [{1234}, <self_ref>, {5678}]
-      ref1: [<ref2>]
-      ref2: [<ref1>]
-    respell:
-      to: 'test2'
-      pipeline:
-        - '@': null
-    '''
-    rep = representation.generate_from_yaml(yaml)
+def test_parse_yaml(rep):
     assert isinstance(rep, Representation)
-    assert rep.variables == {
+
+
+def test_vars(rep):
+    assert rep.vars == {
         'vowels': list('aeiou'),
         'consonants': list('qwrtypsdfghjklzxcvbnm'),
         'all': list('aeiouqwrtypsdfghjklzxcvbnm'),
@@ -31,3 +17,10 @@ def test_parse_yaml():
         'ref1': [],
         'ref2': [],
     }
+
+
+def test_respell(rep):
+    assert set(rep.respellables()) == {'test2', 'test3', 'test4'}
+    assert rep.respell('test2', 'hello world') == 'hll wrld'
+    assert rep.respell('test3', 'hello world') == 'eo o'
+    assert rep.respell('test4', 'hello world') == 'hxllx wxrld'
