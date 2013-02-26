@@ -17,7 +17,7 @@ class Respell(object):
 
     _vowel_var = 'vowels'
     _vowel_alias = '@'
-    _var_pattern = re.compile(r'<(?P<name>[a-zA-Z_][a-zA-Z0-9_]+)>')
+    _var_pattern = re.compile(r'<(?P<var>[a-zA-Z_][a-zA-Z0-9_]+)>')
 
     def __init__(self, pattern, repl, vars):
         self.pattern = pattern
@@ -55,12 +55,14 @@ class Respell(object):
             wrapped_vowel_var = self._wrap_var(self._vowel_var)
             pattern = pattern.replace(self._vowel_alias, wrapped_vowel_var)
         # inline variable references
-        pattern = self._inline_vars(pattern)
+        #def repl(match):
+            #    if
+        #pattern = self._inline_vars(pattern)
         return (re.compile(pattern), repl)
 
     def _inline_vars(self, pattern, repl):
         def repl(match):
-            var = match.group('name')
+            var = match.group('var')
             try:
                 glyphs = self.vars[var]
             except KeyError:

@@ -12,7 +12,8 @@ def test_vars(rep):
     assert rep.vars == {
         'vowels': list('aeiou'),
         'consonants': list('qwrtypsdfghjklzxcvbnm'),
-        'all': list('aeiouqwrtypsdfghjklzxcvbnm'),
+        'long_vowels': list('AEIOU'),
+        'all': list('aeiouqwrtypsdfghjklzxcvbnmAEIOU'),
         'self_ref': list(map(str, range(1, 8 + 1))),
         'ref1': [],
         'ref2': [],

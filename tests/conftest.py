@@ -20,7 +20,8 @@ def rep():
     define:
       vowels: {'aeiou'}
       consonants: {'qwrtypsdfghjklzxcvbnm'}
-      all: [<vowels>, <consonants>]
+      long_vowels: {'AEIOU'}
+      all: [<vowels>, <consonants>, <long_vowels>]
       self_ref: [{1234}, <self_ref>, {5678}]
       ref1: [<ref2>]
       ref2: [<ref1>]
